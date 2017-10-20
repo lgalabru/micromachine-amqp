@@ -1,6 +1,6 @@
 {
   "name": "micromachine-amqp",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.4",
   "description": "Microservices toolbox for Humans.",
   "main": "lib/micromachine-amqp.js",
   "scripts": {

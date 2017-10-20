@@ -17,13 +17,14 @@ class AMQPRuntime {
         return connection.createChannel().then((channel) => {
           var ok = channel.assertQueue(this.queue, {durable: true});
           ok = ok.then((_qok) => {
-            return channel.consume(this.queue, (msg) => {
-              console.log(" [x] Received '%s'", msg.content.toString());
-              this.service.runOperation(JSON.parse(msg.content), callback, resolve, reject);
+            return channel.consume(this.queue, (message) => {
+              const payload = JSON.parse(message.content).payload;
+              console.log("> Received %s", payload);
+              this.service.runOperation(payload, callback, resolve, reject);
             }, {noAck: true});
           });
           return ok.then((_consumeOk) => {
-            console.log(' [*] Waiting for messages. To exit press CTRL+C');
+            console.log(`> ${this.service.constructor.name} consuming messages from '${this.queue}'. To exit press CTRL+C`);
           });
         });
       }).catch(console.warn);
@@ -36,7 +37,8 @@ class AMQPRuntime {
       .then((channel) => {
         var ok = channel.assertQueue(runtime.queue, {durable: true});
         return ok.then(function(_qok) {
-          channel.sendToQueue(runtime.queue, Buffer.from(JSON.stringify(message)));
+          const payload = { payload: message };
+          channel.sendToQueue(runtime.queue, Buffer.from(JSON.stringify(payload)));
           console.log("Message sent");
           return channel.close();
         });
